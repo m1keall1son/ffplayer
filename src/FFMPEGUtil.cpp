@@ -152,8 +152,6 @@ namespace ffmpeg {
 
     int opts::getPts(){ return 0; }
     int opts::findStreamInfo(){ return 1; }
-    static int sSeekByBytes = -1;
-    int& opts::seekByBytes(){ return sSeekByBytes; }
     static int64_t sStartTime = AV_NOPTS_VALUE;
     int64_t& opts::startTime(){ return sStartTime; }
     bool opts::showStatus(){ return true; }

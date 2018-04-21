@@ -25,6 +25,7 @@ namespace ffmpeg {
         mSeekFlags(0),
         mSeekPosition(0),
         mSeekRel(0),
+        mSeekByBytes(false),
         mReadPauseReturn(0),
         mFormatContext(nullptr),
         mRealtime(0),
@@ -115,6 +116,49 @@ namespace ffmpeg {
         /* update current video pts */
         mVideoClock.set(pts, serial);
         mExternalClock.syncToSlave(&mVideoClock);
+    }
+    
+    bool VideoState::hasVideoStream()
+    {
+        return mVideoStream > 0 && mVideoAVStream;
+    }
+    
+    bool VideoState::hasAudioStream()
+    {
+        return mAudioStream > 0 && mAudioAVStream;
+    }
+    
+    bool VideoState::hasSubtitleStream()
+    {
+        return mSubtileStream > 0 && mSubtitleAVStream;
+    }
+    
+    void VideoState::seek(int amount)
+    {
+        int cur_pos;
+        if (mSeekByBytes) {
+            cur_pos = -1;
+            if (hasVideoStream())
+                cur_pos = mPictureQueue.lastShownPosition();
+            if (cur_pos < 0 && hasAudioStream())
+                cur_pos = mSampleQueue.lastShownPosition();
+            if (cur_pos < 0)
+                cur_pos = avio_tell(mFormatContext->pb);
+            if (mFormatContext->bit_rate)
+                amount *= mFormatContext->bit_rate / 8.0;
+            else
+                amount *= 180000.0;
+            cur_pos += amount;
+            streamSeek(cur_pos, amount, 1);
+        } else {
+            cur_pos = getMasterClock();
+            if (isnan(cur_pos))
+                cur_pos = (double)mSeekPosition / AV_TIME_BASE;
+            cur_pos += amount;
+            if (mFormatContext->start_time != AV_NOPTS_VALUE && cur_pos < mFormatContext->start_time / (double)AV_TIME_BASE)
+                cur_pos = mFormatContext->start_time / (double)AV_TIME_BASE;
+            streamSeek((int64_t)(cur_pos * AV_TIME_BASE), (int64_t)(amount * AV_TIME_BASE), 0);
+        }
     }
     
     void VideoState::draw()
@@ -822,8 +866,8 @@ namespace ffmpeg {
         if (ic->pb)
             ic->pb->eof_reached = 0; // FIXME hack, ffplay maybe should not use avio_feof() to test for the end
         
-        if (opts::seekByBytes() < 0)
-            opts::seekByBytes() = !!(ic->iformat->flags & AVFMT_TS_DISCONT) && strcmp("ogg", ic->iformat->name);
+        if (!is->mSeekByBytes)
+            is->seekByBytes(!!(ic->iformat->flags & AVFMT_TS_DISCONT) && strcmp("ogg", ic->iformat->name));
         
         is->mMaxFrameDuration = (ic->iformat->flags & AVFMT_TS_DISCONT) ? 10.0 : 3600.0;
         

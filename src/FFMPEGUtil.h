@@ -51,7 +51,6 @@ namespace ffmpeg {
         AVDictionary **setup_find_stream_info_opts(AVFormatContext *s, AVDictionary *codec_opts);
         int getPts();
         int findStreamInfo();
-        int& seekByBytes();
         int64_t& startTime();
         bool showStatus();
         static const char* wantedStreamSpec[AVMEDIA_TYPE_NB] = {0};

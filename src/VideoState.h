@@ -64,17 +64,25 @@ public:
     void togglePause();
     void toggleMute();
     void updateVolume(int sign, double step);
-    void streamSeek(int64_t pos, int64_t rel, bool seek_by_bytes);
     void setDefaultWindowSize(int width, int height, AVRational sar);
     int getMasterSyncType();
     double getMasterClock();
     void toggleAudioDisplay();
+    bool hasVideoStream();
+    bool hasAudioStream();
+    bool hasSubtitleStream();
+    void seek(int amount);
+    
+    FrameQueue& getVideoFrameQueue(){return mPictureQueue;}
+    FrameQueue& getAudioFrameQueue(){return mSampleQueue;}
+    FrameQueue& getSubtitleFrameQueue(){return mSubtitleQueue;}
 
     inline void forceRefresh(){ mForceRefresh = 1; }
     inline int getForceRefresh(){ return mForceRefresh; }
     inline ShowMode getShowMode()const{return mShowMode;}
     inline int isPaused()const{return mPaused;}
-    
+    inline void seekByBytes(bool set = true){mSeekByBytes = set;}
+
     void videoRefresh(double *remaining_time);
     
 private:
@@ -83,6 +91,7 @@ private:
     static int VideoThread( void* is );
     static int AudioThread( void* is );
     static int SubtitleThread( void* is );
+    void streamSeek(int64_t pos, int64_t rel, bool seek_by_bytes);
     void openWindow(const std::string& filename);
     static int StreamHasEnoughPackets(AVStream *st, int stream_id, PacketQueue *queue);
     static int DecodeInterruptCallback(void *ctx);
@@ -113,6 +122,7 @@ private:
     int mSeekFlags;
     int64_t mSeekPosition;
     int64_t mSeekRel;
+    bool mSeekByBytes;
     int mReadPauseReturn;
     AVFormatContext *mFormatContext;
     int mRealtime;

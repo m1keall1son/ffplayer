@@ -118,39 +118,16 @@ void event_loop(ffmpeg::VideoState* state){
                         break;
                     case SDLK_LEFT:
                         incr = -10.0;
-                        goto do_seek;
+                        state->seek(incr);
                     case SDLK_RIGHT:
                         incr = 10.0;
-                        goto do_seek;
+                        state->seek(incr);
                     case SDLK_UP:
                         incr = 60.0;
-                        goto do_seek;
+                        state->seek(incr);
                     case SDLK_DOWN:
                         incr = -60.0;
-                    do_seek:
-//                        if (seek_by_bytes) {
-//                            pos = -1;
-//                            if (pos < 0 && cur_stream->video_stream >= 0)
-//                                pos = frame_queue_last_pos(&cur_stream->pictq);
-//                            if (pos < 0 && cur_stream->audio_stream >= 0)
-//                                pos = frame_queue_last_pos(&cur_stream->sampq);
-//                            if (pos < 0)
-//                                pos = avio_tell(cur_stream->ic->pb);
-//                            if (cur_stream->ic->bit_rate)
-//                                incr *= cur_stream->ic->bit_rate / 8.0;
-//                            else
-//                                incr *= 180000.0;
-//                            pos += incr;
-//                            stream_seek(cur_stream, pos, incr, 1);
-//                        } else {
-//                            pos = get_master_clock(cur_stream);
-//                            if (isnan(pos))
-//                                pos = (double)cur_stream->seek_pos / AV_TIME_BASE;
-//                            pos += incr;
-//                            if (cur_stream->ic->start_time != AV_NOPTS_VALUE && pos < cur_stream->ic->start_time / (double)AV_TIME_BASE)
-//                                pos = cur_stream->ic->start_time / (double)AV_TIME_BASE;
-//                            stream_seek(cur_stream, (int64_t)(pos * AV_TIME_BASE), (int64_t)(incr * AV_TIME_BASE), 0);
-//                        }
+                        state->seek(incr);
                         break;
                     default:
                         break;
