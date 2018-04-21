@@ -7,7 +7,7 @@ include(cmake/sourceGroupByFolder.cmake)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
-project(sixmonths)
+project(ffplayer)
 
 find_package(SDL2 REQUIRED) # SDL2_INCLUDE_DIR, SDL2_LIBRARIES
 include_directories("${SDL2_INCLUDE_DIR}")
